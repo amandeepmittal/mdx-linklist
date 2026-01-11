@@ -86,19 +86,19 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
   const verbose = options.verbose as boolean;
 
   // Scan for files
-  let spinner = showProgress ? ora('Scanning for MDX files...').start() : null;
+  let spinner = showProgress ? ora(' ☕ Brewing your link report... ').start() : null;
 
   const files = await scanFiles(directory, config);
 
   if (files.length === 0) {
-    spinner?.fail('No MDX files found');
+    spinner?.fail(' 😢 No MDX files found ');
     process.exit(0);
   }
 
-  spinner?.succeed(`Found ${files.length} files`);
+  spinner?.succeed(` 📁 Found ${files.length} files `);
 
   // Extract links from all files
-  spinner = showProgress ? ora('Extracting links...').start() : null;
+  spinner = showProgress ? ora(' 🎣 Fishing for links... ').start() : null;
 
   const allLinks: ExtractedLink[] = [];
 
@@ -107,7 +107,7 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
     allLinks.push(...links);
   }
 
-  spinner?.succeed(`Found ${allLinks.length} links`);
+  spinner?.succeed(` 🔗 Caught ${allLinks.length} links `);
 
   // Filter links based on config
   let linksToCheck = allLinks;
@@ -131,7 +131,7 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
 
   if (internalLinks.length > 0) {
     spinner = showProgress
-      ? ora(`Checking ${internalLinks.length} internal links...`).start()
+      ? ora(` 🏠 Knocking on ${internalLinks.length} local doors... `).start()
       : null;
 
     for (const link of internalLinks) {
@@ -139,18 +139,18 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
       results.push(result);
     }
 
-    spinner?.succeed(`Checked ${internalLinks.length} internal links`);
+    spinner?.succeed(` 🏠 Visited ${internalLinks.length} local doors `);
   }
 
   if (externalLinks.length > 0 && !config.internalOnly) {
     spinner = showProgress
-      ? ora(`Checking ${externalLinks.length} external links...`).start()
+      ? ora(` 🌐 Pinging the interwebs (${externalLinks.length} links)... `).start()
       : null;
 
     const externalResults = await validateExternalLinks(externalLinks, config);
     results.push(...externalResults);
 
-    spinner?.succeed(`Checked ${externalLinks.length} external links`);
+    spinner?.succeed(` 🌐 Pinged ${externalLinks.length} external links `);
   }
 
   // Calculate summary
