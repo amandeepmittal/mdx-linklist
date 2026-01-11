@@ -16,10 +16,22 @@ export function extractLinksFromFile(
   const content = readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
   const rawLinks: ExtractedRawLink[] = [];
+  let inCodeBlock = false;
 
   for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
     const line = lines[lineIndex];
     const lineNumber = lineIndex + 1;
+
+    // Track fenced code blocks (``` or ~~~)
+    if (line.trim().startsWith('```') || line.trim().startsWith('~~~')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+
+    // Skip lines inside code blocks
+    if (inCodeBlock) {
+      continue;
+    }
 
     // Skip HTML comments
     if (line.trim().startsWith('<!--')) {
