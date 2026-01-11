@@ -1,0 +1,11 @@
+{
+  "include": ["./docs/**/*.mdx", "./docs/**/*.md"],
+  "exclude": ["./docs/archive/**", "**/node_modules/**"],
+  "ignorePatterns": ["localhost:*", "127.0.0.1:*", "*.local"],
+  "ignoreDomains": ["twitter.com", "x.com"],
+  "timeout": 10000,
+  "retries": 2,
+  "concurrency": 10,
+  "routePrefixes": ["pages"],
+  "customComponents": ["Link", "A"]
+}
