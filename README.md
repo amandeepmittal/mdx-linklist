@@ -138,6 +138,23 @@ You can use CLI flags (recommended) or create a `mdx-linklist.config.json` file:
 - `<A href="...">`
 - Custom components (configurable via `--component` flag)
 
+## Progress Display
+
+While checking links, you'll see fun progress messages:
+
+```
+ ☕ Brewing your link report...
+ 📁 Found 3 files
+ 🎣 Fishing for links...
+ 🔗 Caught 8 links
+ 🏠 Knocking on 6 local doors...
+ 🏠 Visited 6 local doors
+ 🌐 Pinging the interwebs (2 links)...
+ 🌐 Pinged 2 external links
+```
+
+Use `--no-progress` to hide these messages.
+
 ## Output Formats
 
 ### Console (default)
