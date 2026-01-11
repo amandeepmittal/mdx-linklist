@@ -1,6 +1,6 @@
 {
   "name": "mdx-linklist",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A CLI tool to extract and validate links in MDX files",
   "author": {
     "name": "Aman Mittal",
@@ -26,7 +26,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/amandeepmittal/mdx-linklist.git"
+  },
+  "homepage": "https://github.com/amandeepmittal/mdx-linklist#readme",
+  "bugs": {
+    "url": "https://github.com/amandeepmittal/mdx-linklist/issues"
   },
   "scripts": {
     "build": "tsc",
