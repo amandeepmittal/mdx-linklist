@@ -77,9 +77,11 @@ Many documentation frameworks use route-style paths that map to files in a subdi
 
 ```markdown
 <!-- Link in MDX -->
+
 [Getting Started](/guides/intro)
 
 <!-- Actual file location -->
+
 pages/guides/intro.mdx
 ```
 
@@ -109,31 +111,34 @@ You can use CLI flags (recommended) or create a `mdx-linklist.config.json` file:
 
 ### Config Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `include` | `string[]` | `["./**/*.mdx", "./**/*.md"]` | Glob patterns for files to scan |
-| `exclude` | `string[]` | `["**/node_modules/**", "**/dist/**", "**/.git/**"]` | Glob patterns to exclude |
-| `ignorePatterns` | `string[]` | `["localhost:*", "127.0.0.1:*", "*.local"]` | URL patterns to skip |
-| `ignoreDomains` | `string[]` | `[]` | Domains to skip |
-| `timeout` | `number` | `10000` | External request timeout (ms) |
-| `retries` | `number` | `2` | Retry count for failed requests |
-| `concurrency` | `number` | `10` | Parallel external requests |
-| `routePrefixes` | `string[]` | `[]` | Directory prefixes for absolute paths |
-| `customComponents` | `string[]` | `["Link", "A"]` | JSX components with href props |
+| Option             | Type       | Default                                              | Description                           |
+| ------------------ | ---------- | ---------------------------------------------------- | ------------------------------------- |
+| `include`          | `string[]` | `["./**/*.mdx", "./**/*.md"]`                        | Glob patterns for files to scan       |
+| `exclude`          | `string[]` | `["**/node_modules/**", "**/dist/**", "**/.git/**"]` | Glob patterns to exclude              |
+| `ignorePatterns`   | `string[]` | `["localhost:*", "127.0.0.1:*", "*.local"]`          | URL patterns to skip                  |
+| `ignoreDomains`    | `string[]` | `[]`                                                 | Domains to skip                       |
+| `timeout`          | `number`   | `10000`                                              | External request timeout (ms)         |
+| `retries`          | `number`   | `2`                                                  | Retry count for failed requests       |
+| `concurrency`      | `number`   | `10`                                                 | Parallel external requests            |
+| `routePrefixes`    | `string[]` | `[]`                                                 | Directory prefixes for absolute paths |
+| `customComponents` | `string[]` | `["Link", "A"]`                                      | JSX components with href props        |
 
 ## What It Checks
 
 ### Internal Links
+
 - Relative paths (`./page.mdx`, `../other/page.mdx`)
 - Absolute paths (`/docs/guide`)
 - Combined with anchors (`./page.mdx#section`) - validates file exists
 
 ### External Links
+
 - HTTP/HTTPS URLs
 - Follows redirects
 - Reports status codes
 
 ### JSX Components
+
 - `<Link href="...">`
 - `<A href="...">`
 - Custom components (configurable via `--component` flag)
@@ -193,22 +198,6 @@ mdx-linklist check ./docs --format json
 
 ```bash
 mdx-linklist check ./docs --format markdown --output report.md
-```
-
-## CI Integration
-
-The CLI exits with code 1 when broken links are found:
-
-```yaml
-# GitHub Actions
-- name: Check links
-  run: npx mdx-linklist check ./docs --internal-only
-```
-
-Use `--no-fail` to always exit with code 0:
-
-```bash
-mdx-linklist check ./docs --no-fail
 ```
 
 ## Development
