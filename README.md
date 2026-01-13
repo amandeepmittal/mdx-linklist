@@ -15,7 +15,8 @@ npm install -g mdx-linklist
 Or run directly with npx:
 
 ```bash
-npx mdx-linklist check ./docs
+# Check current directory
+npx mdx-linklist check .
 ```
 
 ## Usage
@@ -23,7 +24,11 @@ npx mdx-linklist check ./docs
 ### Basic Check
 
 ```bash
+# Check specific directory
 mdx-linklist check ./docs
+
+# Check current directory
+mdx-linklist check .
 ```
 
 ### Options
