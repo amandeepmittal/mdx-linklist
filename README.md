@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/mdx-linklist.svg)](https://www.npmjs.com/package/mdx-linklist)
 [![license](https://img.shields.io/npm/l/mdx-linklist.svg)](https://github.com/amandeepmittal/mdx-linklist/blob/main/LICENSE)
 
-A CLI tool to extract and validate links in MDX files. Check for broken internal links and external URLs in your documentation.
+A CLI tool to extract and report broken links in MDX files. Check for broken internal links and external URLs in your documentation.
 
 ## Installation
 
