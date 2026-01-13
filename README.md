@@ -16,7 +16,7 @@ Or run directly with npx:
 
 ```bash
 # Check current directory
-npx mdx-linklist check .
+npx mdx-linklist check ./pages
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ npx mdx-linklist check .
 
 ```bash
 # Check specific directory
-mdx-linklist check ./docs
+mdx-linklist check ./pages
 
 # Check current directory
 mdx-linklist check .
@@ -57,16 +57,16 @@ Options:
 
 ```bash
 # Check only internal links (faster, no network)
-mdx-linklist check ./docs --internal-only
+mdx-linklist check ./pages --internal-only
 
 # Output as JSON
-mdx-linklist check ./docs --format json --output report.json
+mdx-linklist check ./pages --format json --output report.json
 
 # Ignore localhost and specific domains
-mdx-linklist check ./docs --ignore "localhost:*" --ignore-domain "twitter.com"
+mdx-linklist check ./pages --ignore "localhost:*" --ignore-domain "twitter.com"
 
 # Check with custom timeout
-mdx-linklist check ./docs --timeout 5000
+mdx-linklist check ./pages --timeout 5000
 
 # Framework docs with route prefixes (e.g., Expo, Next.js, Docusaurus)
 mdx-linklist check ./docs \
