@@ -2,12 +2,14 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { ExtractedLink, LinkCheckResult, Config } from '../types.js';
 import { resolveInternalPath, findSimilarPaths } from '../utils.js';
+import { lookupRedirect, type RedirectMap } from '../redirects/index.js';
 
 export async function validateInternalLink(
   link: ExtractedLink,
   baseDir: string,
   config: Config,
-  allFiles: string[]
+  allFiles: string[],
+  redirects: RedirectMap = {}
 ): Promise<LinkCheckResult> {
   const pathWithoutAnchor = link.href.split('#')[0];
 
@@ -50,6 +52,16 @@ export async function validateInternalLink(
   }
 
   if (!foundPath) {
+    // Check if this is a known redirect
+    const redirectDestination = lookupRedirect(pathWithoutAnchor, redirects);
+    if (redirectDestination) {
+      return {
+        link,
+        status: 'redirected',
+        redirectDestination,
+      };
+    }
+
     // Try to find similar paths for suggestions
     const relativePaths = allFiles.map((f) => {
       const rel = f.replace(baseDir, '').replace(/^\//, '');

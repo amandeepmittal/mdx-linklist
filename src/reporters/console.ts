@@ -16,6 +16,7 @@ export function reportConsole(
   const brokenExternal = results.filter(
     (r) => r.status === 'broken' && r.link.type === 'external'
   );
+  const redirected = results.filter((r) => r.status === 'redirected');
   const timeouts = results.filter((r) => r.status === 'timeout');
   const skipped = results.filter((r) => r.status === 'skipped');
 
@@ -63,6 +64,24 @@ export function reportConsole(
           `  └─ ${result.error}${result.statusCode ? ` (${result.statusCode})` : ''}`
         )
       );
+      console.log('');
+    }
+  }
+
+  // Redirected links
+  if (redirected.length > 0) {
+    console.log(
+      chalk.yellow.bold(`REDIRECTED LINKS (${redirected.length})`)
+    );
+    console.log('');
+
+    for (const result of redirected) {
+      const relPath = relativePath(result.link.sourceFile, baseDir);
+      console.log(
+        chalk.yellow(`  ${relPath}:${result.link.line}:${result.link.column || 0}`)
+      );
+      console.log(chalk.dim(`  │ ${result.link.href}`));
+      console.log(chalk.cyan(`  └─ ↳ ${result.redirectDestination}`));
       console.log('');
     }
   }
@@ -115,6 +134,9 @@ export function reportConsole(
 
   if (summary.timeouts > 0) {
     console.log(`  Timeouts          ${chalk.yellow(summary.timeouts)}`);
+  }
+  if (summary.redirected > 0) {
+    console.log(`  Redirected        ${chalk.yellow(summary.redirected)}`);
   }
   if (summary.skipped > 0) {
     console.log(`  Skipped           ${chalk.gray(summary.skipped)}`);

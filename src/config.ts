@@ -40,5 +40,7 @@ export function mergeConfig(base: Config, override: Partial<Config>): Config {
     ignoreDomains: [...base.ignoreDomains, ...(override.ignoreDomains ?? [])],
     customComponents: override.customComponents ?? base.customComponents,
     routePrefixes: override.routePrefixes ?? base.routePrefixes,
+    redirectsFile: override.redirectsFile ?? base.redirectsFile,
+    failOnRedirects: override.failOnRedirects ?? base.failOnRedirects,
   };
 }

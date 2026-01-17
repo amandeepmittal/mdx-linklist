@@ -1,6 +1,6 @@
 export type LinkType = 'internal' | 'external' | 'anchor' | 'asset';
 
-export type LinkStatus = 'valid' | 'broken' | 'skipped' | 'timeout';
+export type LinkStatus = 'valid' | 'broken' | 'skipped' | 'timeout' | 'redirected';
 
 export interface ExtractedLink {
   type: LinkType;
@@ -20,6 +20,7 @@ export interface LinkCheckResult {
   suggestion?: string;
   suggestions?: string[];
   responseTime?: number;
+  redirectDestination?: string;
 }
 
 export interface CheckSummary {
@@ -31,6 +32,7 @@ export interface CheckSummary {
   brokenExternal: number;
   skipped: number;
   timeouts: number;
+  redirected: number;
   duration: number;
 }
 
@@ -46,6 +48,8 @@ export interface Config {
   externalOnly: boolean;
   customComponents: string[];
   routePrefixes: string[];
+  redirectsFile?: string;
+  failOnRedirects: boolean;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -60,4 +64,6 @@ export const DEFAULT_CONFIG: Config = {
   externalOnly: false,
   customComponents: ['Link', 'A'],
   routePrefixes: [],
+  redirectsFile: undefined,
+  failOnRedirects: false,
 };

@@ -7,6 +7,7 @@ import { loadConfig, mergeConfig } from './config.js';
 import { scanFiles, extractLinksFromFile } from './scanner/index.js';
 import { validateInternalLink, validateExternalLinks } from './validators/index.js';
 import { reportConsole, reportJson, reportMarkdown } from './reporters/index.js';
+import { parseRedirectsFile, type RedirectMap } from './redirects/index.js';
 import {
   ExtractedLink,
   LinkCheckResult,
@@ -41,6 +42,8 @@ export function createCli(): Command {
     .option('--no-progress', 'Hide progress bar')
     .option('--no-fail', 'Do not exit with code 1 on broken links')
     .option('-v, --verbose', 'Show all links, not just broken')
+    .option('--redirects <file>', 'Path to client-side redirects file')
+    .option('--fail-on-redirects', 'Exit with error if redirected links found')
     .action(async (directory: string, options) => {
       await runCheck(directory, options);
     });
@@ -80,8 +83,21 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
   }
   if (options.timeout) overrides.timeout = parseInt(options.timeout as string, 10);
   if (options.concurrency) overrides.concurrency = parseInt(options.concurrency as string, 10);
+  if (options.redirects) overrides.redirectsFile = options.redirects as string;
+  if (options.failOnRedirects) overrides.failOnRedirects = true;
 
   config = mergeConfig(config, overrides);
+
+  // Load redirects file if specified
+  let redirects: RedirectMap = {};
+  if (config.redirectsFile) {
+    const redirectsPath = resolve(process.cwd(), config.redirectsFile);
+    redirects = parseRedirectsFile(redirectsPath);
+    const redirectCount = Object.keys(redirects).length;
+    if (redirectCount > 0) {
+      console.log(chalk.dim(`Loaded ${redirectCount} redirects from ${config.redirectsFile}`));
+    }
+  }
 
   const showProgress = options.progress !== false;
   const format = options.format as 'console' | 'json' | 'markdown';
@@ -138,7 +154,7 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
       : null;
 
     for (let i = 0; i < internalLinks.length; i++) {
-      const result = await validateInternalLink(internalLinks[i], baseDir, config, files);
+      const result = await validateInternalLink(internalLinks[i], baseDir, config, files, redirects);
       results.push(result);
       if (i % 10 === 0) await yieldToEventLoop();
     }
@@ -175,6 +191,7 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
     ).length,
     skipped: results.filter((r) => r.status === 'skipped').length,
     timeouts: results.filter((r) => r.status === 'timeout').length,
+    redirected: results.filter((r) => r.status === 'redirected').length,
     duration: Date.now() - startTime,
   };
 
@@ -203,8 +220,9 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
 
   // Exit with error code if broken links found
   const brokenCount = summary.brokenInternal + summary.brokenExternal + summary.timeouts;
+  const shouldFailOnRedirects = config.failOnRedirects && summary.redirected > 0;
 
-  if (brokenCount > 0 && options.fail !== false) {
+  if ((brokenCount > 0 || shouldFailOnRedirects) && options.fail !== false) {
     process.exit(1);
   }
 }

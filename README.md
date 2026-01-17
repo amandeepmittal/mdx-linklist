@@ -51,6 +51,8 @@ Options:
   --no-progress               Hide progress bar
   --no-fail                   Do not exit with code 1 on broken links
   -v, --verbose               Show all links, not just broken
+  --redirects <file>          Path to client-side redirects file
+  --fail-on-redirects         Exit with error if redirected links found
 ```
 
 ### Examples
@@ -74,6 +76,12 @@ mdx-linklist check ./docs \
   --route-prefix pages \
   --component Link \
   --component APIBox
+
+# Check with client-side redirects file
+mdx-linklist check ./docs --redirects ./common/client-redirects.ts -i
+
+# Fail CI if redirected links exist (to encourage updating old links)
+mdx-linklist check ./docs --redirects ./redirects.json --fail-on-redirects
 ```
 
 ### Route Prefixes
@@ -96,6 +104,46 @@ Use `--route-prefix` to tell mdx-linklist where to find files for absolute paths
 mdx-linklist check ./docs --route-prefix pages
 ```
 
+### Client-Side Redirects
+
+Many documentation sites use client-side redirects to handle moved pages. Without redirect awareness, mdx-linklist would flag these as broken links.
+
+Use `--redirects` to provide a redirects file:
+
+```bash
+mdx-linklist check ./docs --redirects ./common/client-redirects.ts
+```
+
+Redirected links are reported separately and **don't cause a failure by default**:
+
+```
+REDIRECTED LINKS (2)
+
+  docs/guide.mdx:42:5
+  │ /guides/splash-screens/
+  └─ ↳ /develop/user-interface/splash-screen/
+```
+
+**Supported formats:**
+
+- **JSON** - Simple key-value object:
+  ```json
+  {
+    "/old-path": "/new-path",
+    "/guides/splash-screens": "/develop/user-interface/splash-screen"
+  }
+  ```
+
+- **TypeScript/JavaScript** - Extracts `Record<string, string>` style objects (like Expo's `client-redirects.ts`):
+  ```typescript
+  const RENAMED_PAGES: Record<string, string> = {
+    '/old-path/': '/new-path/',
+    '/guides/splash-screens/': '/develop/user-interface/splash-screen/',
+  };
+  ```
+
+Use `--fail-on-redirects` in CI to encourage updating old links to their canonical URLs.
+
 ## Configuration
 
 You can use CLI flags (recommended) or create a `mdx-linklist.config.json` file:
@@ -110,23 +158,27 @@ You can use CLI flags (recommended) or create a `mdx-linklist.config.json` file:
   "retries": 2,
   "concurrency": 10,
   "routePrefixes": ["pages"],
-  "customComponents": ["Link", "A", "CustomLink"]
+  "customComponents": ["Link", "A", "CustomLink"],
+  "redirectsFile": "./common/client-redirects.ts",
+  "failOnRedirects": false
 }
 ```
 
 ### Config Options
 
-| Option             | Type       | Default                                              | Description                           |
-| ------------------ | ---------- | ---------------------------------------------------- | ------------------------------------- |
-| `include`          | `string[]` | `["./**/*.mdx", "./**/*.md"]`                        | Glob patterns for files to scan       |
-| `exclude`          | `string[]` | `["**/node_modules/**", "**/dist/**", "**/.git/**"]` | Glob patterns to exclude              |
-| `ignorePatterns`   | `string[]` | `["localhost:*", "127.0.0.1:*", "*.local"]`          | URL patterns to skip                  |
-| `ignoreDomains`    | `string[]` | `[]`                                                 | Domains to skip                       |
-| `timeout`          | `number`   | `10000`                                              | External request timeout (ms)         |
-| `retries`          | `number`   | `2`                                                  | Retry count for failed requests       |
-| `concurrency`      | `number`   | `10`                                                 | Parallel external requests            |
-| `routePrefixes`    | `string[]` | `[]`                                                 | Directory prefixes for absolute paths |
-| `customComponents` | `string[]` | `["Link", "A"]`                                      | JSX components with href props        |
+| Option             | Type       | Default                                              | Description                            |
+| ------------------ | ---------- | ---------------------------------------------------- | -------------------------------------- |
+| `include`          | `string[]` | `["./**/*.mdx", "./**/*.md"]`                        | Glob patterns for files to scan        |
+| `exclude`          | `string[]` | `["**/node_modules/**", "**/dist/**", "**/.git/**"]` | Glob patterns to exclude               |
+| `ignorePatterns`   | `string[]` | `["localhost:*", "127.0.0.1:*", "*.local"]`          | URL patterns to skip                   |
+| `ignoreDomains`    | `string[]` | `[]`                                                 | Domains to skip                        |
+| `timeout`          | `number`   | `10000`                                              | External request timeout (ms)          |
+| `retries`          | `number`   | `2`                                                  | Retry count for failed requests        |
+| `concurrency`      | `number`   | `10`                                                 | Parallel external requests             |
+| `routePrefixes`    | `string[]` | `[]`                                                 | Directory prefixes for absolute paths  |
+| `customComponents` | `string[]` | `["Link", "A"]`                                      | JSX components with href props         |
+| `redirectsFile`    | `string`   | `undefined`                                          | Path to client-side redirects file     |
+| `failOnRedirects`  | `boolean`  | `false`                                              | Treat redirected links as errors       |
 
 ## What It Checks
 
@@ -183,12 +235,19 @@ BROKEN EXTERNAL LINKS (1)
   │ https://example.com/old-page
   └─ 404 Not Found
 
+REDIRECTED LINKS (2)
+
+  docs/intro.mdx:12:5
+  │ /guides/splash-screens/
+  └─ ↳ /develop/user-interface/splash-screen/
+
 ──────────────────────────────────────────
 SUMMARY
 ──────────────────────────────────────────
   Files scanned     50
   Total links       234
   Broken            3
+  Redirected        2
   Duration          12.4s
 ──────────────────────────────────────────
 ```

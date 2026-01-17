@@ -30,6 +30,7 @@ export function reportMarkdown(
     `| Broken (external) | ${summary.brokenExternal} |`
   );
   lines.push(`| Timeouts | ${summary.timeouts} |`);
+  lines.push(`| Redirected | ${summary.redirected} |`);
   lines.push(`| Skipped | ${summary.skipped} |`);
   lines.push(`| Duration | ${formatDuration(summary.duration)} |`);
   lines.push('');
@@ -99,6 +100,34 @@ export function reportMarkdown(
         lines.push(
           `  - Error: ${result.error}${result.statusCode ? ` (${result.statusCode})` : ''}`
         );
+      }
+      lines.push('');
+    }
+  }
+
+  // Redirected links
+  const redirected = results.filter((r) => r.status === 'redirected');
+
+  if (redirected.length > 0) {
+    lines.push(`## Redirected Links (${redirected.length})`);
+    lines.push('');
+
+    // Group by file
+    const byFile = new Map<string, LinkCheckResult[]>();
+    for (const result of redirected) {
+      const file = relativePath(result.link.sourceFile, baseDir);
+      const existing = byFile.get(file) || [];
+      existing.push(result);
+      byFile.set(file, existing);
+    }
+
+    for (const [file, fileResults] of byFile) {
+      lines.push(`### ${file}`);
+      lines.push('');
+
+      for (const result of fileResults) {
+        lines.push(`- **Line ${result.link.line}**: \`${result.link.href}\``);
+        lines.push(`  - Redirects to: \`${result.redirectDestination}\``);
       }
       lines.push('');
     }
