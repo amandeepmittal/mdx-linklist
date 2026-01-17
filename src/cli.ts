@@ -52,6 +52,8 @@ function collect(value: string, previous: string[]): string[] {
   return previous.concat([value]);
 }
 
+const yieldToEventLoop = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
+
 async function runCheck(directory: string, options: Record<string, unknown>): Promise<void> {
   const startTime = Date.now();
   const baseDir = resolve(process.cwd(), directory);
@@ -102,9 +104,10 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
 
   const allLinks: ExtractedLink[] = [];
 
-  for (const file of files) {
-    const links = extractLinksFromFile(file, config);
+  for (let i = 0; i < files.length; i++) {
+    const links = extractLinksFromFile(files[i], config);
     allLinks.push(...links);
+    if (i % 10 === 0) await yieldToEventLoop();
   }
 
   spinner?.succeed(` 🔗 Caught ${allLinks.length} links `);
@@ -134,9 +137,10 @@ async function runCheck(directory: string, options: Record<string, unknown>): Pr
       ? ora(` 🏠 Knocking on ${internalLinks.length} local doors... `).start()
       : null;
 
-    for (const link of internalLinks) {
-      const result = await validateInternalLink(link, baseDir, config, files);
+    for (let i = 0; i < internalLinks.length; i++) {
+      const result = await validateInternalLink(internalLinks[i], baseDir, config, files);
       results.push(result);
+      if (i % 10 === 0) await yieldToEventLoop();
     }
 
     spinner?.succeed(` 🏠 Visited ${internalLinks.length} local doors `);
